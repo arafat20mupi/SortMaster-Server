@@ -12,6 +12,8 @@ app.use(cors({
   origin: [
     "http://localhost:5173",
     "http://localhost:5174",
+    "https://jobtask-62cec.web.app",
+    "https://server-side-mauve.vercel.app"
   ],
   credentials: true,
 }));
