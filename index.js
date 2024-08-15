@@ -4,7 +4,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const app = express();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, MongoError  } = require('mongodb');
 
 const port = process.env.PORT || 5000;
 app.use(cookieParser());
@@ -44,7 +44,7 @@ async function run() {
         const limit = parseInt(req.query.limit) || 9;
 
         // Calculate the number of documents to skip
-        const skip = (page -1 )  * limit
+        const skip = (page - 1) * limit
 
         // Fetch users with pagination
         const cursor = usersCollection.find().skip(skip).limit(limit);
@@ -68,14 +68,27 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
-    app.post('/product' , async (req, res) => {
+    app.post('/product', async (req, res) => {
       try {
+        // Validate the required fields
+        const { product_name, product_image, price, ratings, description, date_posted, brand_name } = req.body;
+        if (!product_name || !product_image || !price || !description || !brand_name || !ratings || !date_posted) {
+          return res.status(400).json({ error: 'Missing required fields' });
+        }
+
         const result = await usersCollection.insertOne(req.body);
-        res.send(result.ops[0]);
+
+        // Fetch the inserted document using the insertedId
+        const insertedProduct = await usersCollection.findOne({ _id: result.insertedId });
+
+        res.status(201).json({ message: 'Product added successfully', product: insertedProduct });
       } catch (error) {
-        res.status(500).send("Error adding user");
+        console.error("Error adding product:", error);
       }
-    } )
+    });
+
+
+
 
     // Test the connection with a ping
     await client.db("admin").command({ ping: 1 });
