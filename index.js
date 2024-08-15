@@ -68,6 +68,14 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+    app.post('/product' , async (req, res) => {
+      try {
+        const result = await usersCollection.insertOne(req.body);
+        res.send(result.ops[0]);
+      } catch (error) {
+        res.status(500).send("Error adding user");
+      }
+    } )
 
     // Test the connection with a ping
     await client.db("admin").command({ ping: 1 });
