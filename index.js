@@ -27,7 +27,7 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
-const usersCollection = client.db('JobTask').collection('users');
+const usersCollection = client.db('JobTask').collection('Product');
 async function run() {
   try {
     // Connect the client to the server
@@ -44,7 +44,7 @@ async function run() {
         const limit = parseInt(req.query.limit) || 9;
 
         // Calculate the number of documents to skip
-        const skip = page  * limit
+        const skip = (page -1 )  * limit
 
         // Fetch users with pagination
         const cursor = usersCollection.find().skip(skip).limit(limit);
@@ -63,7 +63,11 @@ async function run() {
         res.status(500).send("Error fetching users");
       }
     });
-
+    app.get('/user/last', async (req, res) => {
+      const cursor = usersCollection.find().sort({ _id: -1 }).limit(6);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
     // Test the connection with a ping
     await client.db("admin").command({ ping: 1 });
